@@ -1,5 +1,7 @@
-import	React						from	'react';
+import	React, {ReactElement}		from	'react';
 import	Head						from	'next/head';
+import	{AppProps}					from	'next/app';
+import	{WithYearn}					from	'@yearn-finance/web-lib/contexts';
 import	{DefaultSeo}				from	'next-seo';
 import	{NetworkContextApp}			from	'contexts/useNetwork';
 import	{UIContextApp}				from	'contexts/useUI';
@@ -9,24 +11,23 @@ import	Footer						from	'components/StandardFooter';
 
 import	'style/Default.css';
 
-function	WithLayout({props}) {
+function	WithLayout(props: AppProps): ReactElement {
 	const	{Component, pageProps, router} = props;
 
 	return (
 		<>
 			<MenuMobile />
-			<div id={'app'} className={'flex relative flex-col mx-auto mb-0 w-full max-w-6xl'}>
+			<div id={'app'} className={'relative mx-auto mb-0 flex w-full max-w-6xl flex-col'}>
 				<div className={'grid grid-cols-15 gap-x-4'}>
-					<div className={'hidden md:block md:col-span-3'}>
+					<div className={'hidden md:col-span-3 md:block'}>
 						<MenuDesktop />
 					</div>
-					<main className={'flex flex-col col-span-15 pt-20 min-h-full md:col-span-12 md:pt-12'}>
+					<main className={'col-span-15 flex min-h-full flex-col pt-20 md:col-span-12 md:pt-12'}>
 						<Component
 							key={router.route}
-							element={props.element}
-							router={props.router}
+							router={router}
 							{...pageProps} />
-						<div className={'grid static bottom-0 grid-cols-12 mt-auto'}>
+						<div className={'static bottom-0 mt-auto grid grid-cols-12'}>
 							<div className={'col-span-12'}>
 								<Footer />
 							</div>
@@ -38,7 +39,7 @@ function	WithLayout({props}) {
 	);
 }
 
-function	AppWrapper(props) {
+function	AppWrapper(props: AppProps): ReactElement {
 	const	WEBSITE_URI = process.env.WEBSITE_URI;
 
 	return (
@@ -82,35 +83,37 @@ function	AppWrapper(props) {
 							url: `${WEBSITE_URI}og.png`,
 							width: 1200,
 							height: 675,
-							alt: 'Yearn',
+							alt: 'Yearn'
 						}
 					]
 				}}
 				twitter={{
 					handle: '@iearnfinance',
 					site: '@iearnfinance',
-					cardType: 'summary_large_image',
+					cardType: 'summary_large_image'
 				}} />
-			<WithLayout props={props} />
+			<WithLayout {...props} />
 		</>
 	);
 }
 
-function	MyApp(props) {
+function	MyApp(props: AppProps): ReactElement {
 	const	{Component, pageProps} = props;
 	
 	return (
-		<UIContextApp>
-			<LocalizationContextApp router={props.router}>
-				<NetworkContextApp>
-					<AppWrapper
-						Component={Component}
-						pageProps={pageProps}
-						element={props.element}
-						router={props.router} />
-				</NetworkContextApp>
-			</LocalizationContextApp>
-		</UIContextApp>
+		<WithYearn>
+			<UIContextApp>
+				<LocalizationContextApp router={props.router}>
+					<NetworkContextApp>
+						<AppWrapper
+							Component={Component}
+							pageProps={pageProps}
+							// element={props.element}
+							router={props.router} />
+					</NetworkContextApp>
+				</LocalizationContextApp>
+			</UIContextApp>
+		</WithYearn>
 	);
 }
 
