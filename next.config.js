@@ -1,16 +1,21 @@
 const Dotenv = require('dotenv-webpack');
+const withPWA = require('next-pwa');
 
-module.exports = ({
+module.exports = withPWA({
+	images: {
+		domains: [
+			'rawcdn.githack.com',
+			'raw.githubusercontent.com'
+		]
+	},
+	pwa: {
+		dest: 'public'
+	},
 	i18n: {
 		locales: ['en', 'fr', 'es', 'de', 'pt', 'el', 'tr', 'vi', 'zh', 'hi', 'ja', 'id', 'ru'],
 		defaultLocale: 'en'
 	},
 	plugins: [new Dotenv()],
-	images: {
-		domains: [
-			'rawcdn.githack.com'
-		],
-	},
 	env: {
 		WEBSITE_URI: 'https://vaults.yearn.finance/',
 		WEBSITE_NAME: 'The Vaults at Yearn',
