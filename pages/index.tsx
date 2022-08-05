@@ -1,27 +1,27 @@
-import	React				from	'react';
-import	Link				from	'next/link';
-import	HeadIconYearn		from	'components/icons/HeadIconYearn';
-import	HeadIconEth			from	'components/icons/HeadIconEth';
-import	HeadIconFtm			from	'components/icons/HeadIconFtm';
-import	useLocalization		from	'contexts/useLocalization';
-import	{parseMarkdown}		from	'utils';
+import	React, {ReactElement}	from	'react';
+import	Link					from	'next/link';
+import	HeadIconYearn			from	'components/icons/HeadIconYearn';
+import	HeadIconEth				from	'components/icons/HeadIconEth';
+import	HeadIconFtm				from	'components/icons/HeadIconFtm';
+import	{useLocalization}		from	'contexts/useLocalization';
+import	{parseMarkdown}			from	'utils';
 
-function	Index() {
+function	Index(): ReactElement {
 	const	{common} = useLocalization();
 
 	return (
-		<article className={'p-4 w-full bg-white dark:bg-black rounded-sm'}>
+		<article className={'w-full rounded-sm bg-white p-4 dark:bg-black'}>
 			<div className={'w-full'}>
 				<div className={'flex flex-col'}>
 					<div className={'mb-8'}>
 						<HeadIconYearn />
 					</div>
 					<h1
-						className={'mb-8 text-4xl font-bold text-dark-blue-1 dark:text-white whitespace-pre-line md:text-6xl'}
+						className={'mb-8 whitespace-pre-line text-4xl font-bold text-dark-blue-1 dark:text-white md:text-6xl'}
 						dangerouslySetInnerHTML={{__html: parseMarkdown(common['overview-title'])}} />
 					<div className={'mb-8'}>
 						<p
-							className={'inline text-gray-blue-1 dark:text-gray-3 whitespace-pre-line'}
+							className={'inline whitespace-pre-line text-gray-blue-1 dark:text-gray-3'}
 							dangerouslySetInnerHTML={{__html: parseMarkdown(common['overview-description'])}}>
 						</p>
 					</div>
@@ -29,9 +29,9 @@ function	Index() {
 			</div>
 
 			<div className={'w-full'}>
-				<div className={'flex flex-row items-center mb-2'}>
-					<div className={'mr-4 w-10 h-10'}>
-						<HeadIconEth className={'w-10 h-10'}/>
+				<div className={'mb-2 flex flex-row items-center'}>
+					<div className={'mr-4 h-10 w-10'}>
+						<HeadIconEth className={'h-10 w-10'}/>
 					</div>
 					<div>
 						<h1 className={'title'}>
@@ -48,9 +48,9 @@ function	Index() {
 			</div>
 
 			<div className={'w-full'}>
-				<div className={'flex flex-row items-center mt-8 mb-2'}>
-					<div className={'mr-4 w-10 h-10'}>
-						<HeadIconFtm className={'w-10 h-10'}/>
+				<div className={'mt-8 mb-2 flex flex-row items-center'}>
+					<div className={'mr-4 h-10 w-10'}>
+						<HeadIconFtm className={'h-10 w-10'}/>
 					</div>
 					<div>
 						<h1 className={'title'}>
