@@ -1,11 +1,16 @@
 import {toAddress} from 'utils';
 
-async function getVaultStrategies({vaultStrategies, stratTree}): Promise<[{
+
+export type TStratTree = {[key: string]: {name: string, description: string, localization?: object}}
+export type TStrategy = {
     address: string;
     name: string;
-    description: string;
-    localization: object;
-}[], boolean]> {
+    description?: string;
+    localization?: object;
+}
+
+
+async function getVaultStrategies({vaultStrategies, stratTree}: {vaultStrategies: TStrategy[], stratTree: TStratTree}): Promise<[TStrategy[], boolean]> {
 	const 	strategies = [];
 	let		hasMissingStrategiesDescriptions = false;
 	for (const vaultStrategy of vaultStrategies) {
@@ -35,10 +40,39 @@ async function getVaultStrategies({vaultStrategies, stratTree}): Promise<[{
 	return ([strategies, hasMissingStrategiesDescriptions]);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-async function getStrategies({network}) {
+export type TVaultsWithStrat = {
+    address: string;
+    symbol: string;
+    name: string;
+    display_name: string;
+    icon: string;
+	underlying?: string;
+	hasBoost?: boolean;
+    strategies: TStrategy[];
+    hasMissingStrategiesDescriptions?: boolean;
+}
+export type TVault = {
+    address: string;
+    name?: string;
+    logo?: string;
+    title?: string;
+    display_name?: string;
+    icon?: string;
+    strategies: TStrategy[];
+    migration: {available?: boolean};
+    apy?: {type?: string; composite?: {boost?: boolean}};
+	token: {symbol?: string; name?: string; address?: string;}
+	want?: {symbol?: string; name?: string; address?: string;}
+    type: string;
+    symbol?: string;
+    status?: string;
+    special?: boolean;
+
+}
+
+async function getStrategies({network}: {network: number}): Promise<TVaultsWithStrat[]> {
 	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
-	const	stratTree = {};
+	const	stratTree: TStratTree = {};
 
 	for (const stratDetails of allStrategiesAddr) {
 		for (const address of (stratDetails.addresses)) {
@@ -50,10 +84,10 @@ async function getStrategies({network}) {
 		}
 	}
 
-	let		vaults = (await (await fetch(`https://api.yearn.finance/v1/chains/${network}/vaults/all`)).json());
-	vaults = vaults.filter(e => !e.migration || !e.migration?.available);
-	vaults = vaults.filter(e => e.type !== 'v1');
-	const	vaultsWithStrats = [];
+	let		vaults: TVault[] = (await (await fetch(`https://api.yearn.finance/v1/chains/${network}/vaults/all`)).json());
+	vaults = vaults.filter((e): boolean => !e.migration || !e.migration?.available);
+	vaults = vaults.filter((e): boolean => e.type !== 'v1');
+	const	vaultsWithStrats: TVaultsWithStrat[] = [];
 
 	for (const vault of vaults) {
 		const	[strategies, hasMissingStrategiesDescriptions] = await getVaultStrategies({

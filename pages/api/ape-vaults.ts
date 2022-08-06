@@ -1,6 +1,8 @@
 import	{ethers}				from	'ethers';
 import	{Provider, Contract}	from	'ethcall';
 import	{toAddress}				from	'utils';
+import type {NextApiRequest, NextApiResponse} from 'next';
+import type {TVault, TVaultsWithStrat} from './strategies';
 
 export function getProvider(chain = 1): ethers.providers.Provider {
 	if (chain === 1) {
@@ -118,16 +120,7 @@ async function getVaultStrategies({vaultAddress, network, stratTree}: {vaultAddr
 	return ([strategies, hasMissingStrategiesDescriptions]);
 }
 
-async function getStrategies({network}: {network: number}): Promise<{
-    address: string;
-    symbol: string;
-    underlying: string;
-    name: string;
-    display_name: string;
-    icon: string;
-    strategies: TStrategy[];
-    hasMissingStrategiesDescriptions: boolean;
-}[]> {
+async function getStrategies({network}: {network: number}): Promise<TVaultsWithStrat[]> {
 	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree: TStratTree = {};
 	for (const stratDetails of allStrategiesAddr) {
@@ -139,9 +132,9 @@ async function getStrategies({network}: {network: number}): Promise<{
 		}
 	}
 
-	const	vaults = (await (await fetch(`https://ape.tax/api/vaults?network=${network}`)).json()).data;
-	const	vaultsWithStrats = [];
-	const	filteredVaults = vaults.filter(e => e.status !== 'endorsed');
+	const	vaults: TVault[] = (await (await fetch(`https://ape.tax/api/vaults?network=${network}`)).json()).data;
+	const	vaultsWithStrats: TVaultsWithStrat[] = [];
+	const	filteredVaults = vaults.filter((e): boolean => e.status !== 'endorsed');
 
 	await Promise.all(filteredVaults.map(async (vault): Promise<void> => {
 		const	[strategies, hasMissingStrategiesDescriptions] = await getVaultStrategies({
@@ -152,8 +145,8 @@ async function getStrategies({network}: {network: number}): Promise<{
 
 		vaultsWithStrats.push({
 			address: vault.address || '', 
-			symbol: vault.want.symbol || '', 
-			underlying: vault.want.address || '',
+			symbol: vault.want?.symbol || '', 
+			underlying: vault.want?.address || '',
 			name: vault.title || '', 
 			display_name: vault.title || '', 
 			icon: vault.logo || '',
@@ -166,7 +159,6 @@ async function getStrategies({network}: {network: number}): Promise<{
 
 const	vaultsMapping: {[key: number]: object} = {};
 const	vaultsMappingAccess: {[key: string]: number} = {};
-import type {NextApiRequest, NextApiResponse} from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
 	// eslint-disable-next-line prefer-const
