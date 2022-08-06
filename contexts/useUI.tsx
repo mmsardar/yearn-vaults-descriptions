@@ -1,19 +1,26 @@
 import	React, {useEffect, useContext, createContext}	from	'react';
 import	useLocalStorage									from	'hooks/useLocalStorage';
 
-const	UI = createContext();
-export const UIContextApp = ({children}) => {
+type TUIContext = {
+	theme: string;
+	switchTheme: () => void;
+  }
+
+
+const	UI = createContext<TUIContext>({theme: '', switchTheme: (): void => void 0});
+export const UIContextApp = ({children}: {children: React.ReactNode}): React.ReactElement => {
 	const	[theme, set_theme] = useLocalStorage('theme', 'light-initial');
 
-	useEffect(() => {
+	useEffect((): void => {
 		if (theme !== 'light-initial') {
 			const lightModeMediaQuery = window.matchMedia('(prefers-color-scheme: light)');
 			if (lightModeMediaQuery.matches)
 				set_theme('light');
 		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	useEffect(() => {
+	useEffect((): void => {
 		if (theme === 'light') {
 			document.documentElement.classList.add('light');
 			document.documentElement.classList.remove('dark');
@@ -28,12 +35,12 @@ export const UIContextApp = ({children}) => {
 		<UI.Provider
 			value={{
 				theme,
-				switchTheme: () => set_theme(t => t === 'dark' ? 'light' : 'dark'),
+				switchTheme: (): void => set_theme((t): string => t === 'dark' ? 'light' : 'dark')
 			}}>
 			{children}
 		</UI.Provider>
 	);
 };
 
-export const useUI = () => useContext(UI);
+export const useUI = (): TUIContext => useContext(UI);
 export default useUI;

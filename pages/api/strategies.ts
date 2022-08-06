@@ -1,11 +1,16 @@
 import {toAddress} from 'utils';
 
-async function getVaultStrategies({vaultStrategies, stratTree}) {
+async function getVaultStrategies({vaultStrategies, stratTree}): Promise<[{
+    address: string;
+    name: string;
+    description: string;
+    localization: object;
+}[], boolean]> {
 	const 	strategies = [];
 	let		hasMissingStrategiesDescriptions = false;
-	for (let i = 0; i < vaultStrategies.length; i++) {
-		const	strategyAddress = toAddress(vaultStrategies[i].address);
-		const	strategyName = vaultStrategies[i].name;
+	for (const vaultStrategy of vaultStrategies) {
+		const	strategyAddress = toAddress(vaultStrategy.address);
+		const	strategyName = vaultStrategy.name;
 		const	details = stratTree[strategyAddress];
 		if (details) {
 			if (!details?.description) {
@@ -31,13 +36,11 @@ async function getVaultStrategies({vaultStrategies, stratTree}) {
 }
 
 async function getStrategies({network}) {
-	let		allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
+	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree = {};
 
-	for (let index = 0; index < allStrategiesAddr.length; index++) {
-		const stratDetails = allStrategiesAddr[index];
-		for (let jindex = 0; jindex < (stratDetails.addresses).length; jindex++) {
-			const address = stratDetails.addresses[jindex];
+	for (const stratDetails of allStrategiesAddr) {
+		for (const address of (stratDetails.addresses)) {
 			stratTree[toAddress(address)] = {
 				description: stratDetails.description,
 				name: stratDetails.name,
@@ -51,8 +54,7 @@ async function getStrategies({network}) {
 	vaults = vaults.filter(e => e.type !== 'v1');
 	const	vaultsWithStrats = [];
 
-	for (let index = 0; index < vaults.length; index++) {
-		const vault = vaults[index];
+	for (const vault of vaults) {
 		const	[strategies, hasMissingStrategiesDescriptions] = await getVaultStrategies({
 			vaultStrategies: vault.strategies,
 			stratTree
@@ -71,6 +73,7 @@ async function getStrategies({network}) {
 	return (vaultsWithStrats);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default async function handler(req, res) {
 	let		{network} = req.query;
 	network = Number(network);
@@ -78,6 +81,7 @@ export default async function handler(req, res) {
 	return res.status(200).json(result);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function listVaultsWithStrategies({network = 1}) {
 	network = Number(network);
 	const	result = await getStrategies({network});

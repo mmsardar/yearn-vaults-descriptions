@@ -1,5 +1,6 @@
 import {toAddress} from 'utils';
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getVaultStrategies({vaultAddress, wantAddress, wantName, tokenTree, vaultTree}) {
 	const	vaultTokenAddress = toAddress(vaultAddress);
 	const	vaultTokenHasIPFSFile = vaultTree[vaultTokenAddress];
@@ -16,13 +17,12 @@ async function getVaultStrategies({vaultAddress, wantAddress, wantName, tokenTre
 }
 
 async function getTokens({network}) {
-	let		vaultDataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/vaults/all`)).json();
-	let		dataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/tokens/all`)).json();
+	const	vaultDataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/vaults/all`)).json();
+	const	dataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/tokens/all`)).json();
 	const	tokenTree = {};
 	const	vaultTree = {};
 
-	for (let index = 0; index < dataFromIPFS.length; index++) {
-		const tokenDetails = dataFromIPFS[index];
+	for (const tokenDetails of dataFromIPFS) {
 		const address = tokenDetails.address;
 		tokenTree[toAddress(address)] = {
 			description: tokenDetails.description || '',
@@ -31,8 +31,7 @@ async function getTokens({network}) {
 		};
 	}
 
-	for (let index = 0; index < vaultDataFromIPFS.length; index++) {
-		const vaultDetails = vaultDataFromIPFS[index];
+	for (const vaultDetails of vaultDataFromIPFS) {
 		const address = vaultDetails.address;
 		vaultTree[toAddress(address)] = true;
 	}
@@ -43,8 +42,7 @@ async function getTokens({network}) {
 	vaults = vaults.filter(e => e.type !== 'v1');
 	const	vaultsWithStrats = [];
 
-	for (let index = 0; index < vaults.length; index++) {
-		const vault = vaults[index];
+	for (const vault of vaults) {
 		const	[tokens, hasMissingTokenInfo] = await getVaultStrategies({
 			vaultAddress: vault.address,
 			wantAddress: vault?.token?.address,
@@ -66,6 +64,7 @@ async function getTokens({network}) {
 	return (vaultsWithStrats);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default async function handler(req, res) {
 	let		{network} = req.query;
 	network = Number(network);
@@ -73,6 +72,7 @@ export default async function handler(req, res) {
 	return res.status(200).json(result);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function listVaultsWithTokens({network = 1}) {
 	network = Number(network);
 	const	result = await getTokens({network});

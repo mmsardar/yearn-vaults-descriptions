@@ -1,6 +1,6 @@
 import {toAddress} from 'utils';
 
-const	STABLE_UNDERLYING = [];
+const	STABLE_UNDERLYING: string[][] = [];
 STABLE_UNDERLYING[1] = [
 	'0xdAC17F958D2ee523a2206206994597C13D831ec7', // USDT
 	'0x57Ab1ec28D129707052df4dF418D58a2D46d5f51', // sUSD
@@ -17,12 +17,13 @@ STABLE_UNDERLYING[250] = [
 	'0x049d68029688eAbF473097a2fC38ef61633A3C7A', // fUSDT
 ];
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getVaultStrategies({vaultStrategies, stratTree}) {
 	const 	strategies = [];
 	let		hasMissingStrategiesDescriptions = false;
-	for (let i = 0; i < vaultStrategies.length; i++) {
-		const	strategyAddress = toAddress(vaultStrategies[i].address);
-		const	strategyName = vaultStrategies[i].name;
+	for (const vaultStrategy of vaultStrategies) {
+		const	strategyAddress = toAddress(vaultStrategy.address);
+		const	strategyName = vaultStrategy.name;
 		const	details = stratTree[strategyAddress];
 		if (details) {
 			if (!details?.description) {
@@ -44,17 +45,15 @@ async function getVaultStrategies({vaultStrategies, stratTree}) {
 			hasMissingStrategiesDescriptions = true;
 		}
 	}
-	return ([strategies, hasMissingStrategiesDescriptions]);
+	return ([strategies, hasMissingStrategiesDescriptions] as const);
 }
 
 async function getStrategies({network, isCurve, isRetired, isV1, isAll, isStable, isDefi}) {
 	let		allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree = {};
 
-	for (let index = 0; index < allStrategiesAddr.length; index++) {
-		const stratDetails = allStrategiesAddr[index];
-		for (let jindex = 0; jindex < (stratDetails.addresses).length; jindex++) {
-			const address = stratDetails.addresses[jindex];
+	for (const stratDetails of allStrategiesAddr) {
+		for (const address of (stratDetails.addresses)) {
 			stratTree[toAddress(address)] = {
 				description: stratDetails.description,
 				name: stratDetails.name,
@@ -90,8 +89,7 @@ async function getStrategies({network, isCurve, isRetired, isV1, isAll, isStable
 	}
 	const	vaultsWithStrats = [];
 
-	for (let index = 0; index < vaults.length; index++) {
-		const vault = vaults[index];
+	for (const vault of vaults) {
 		const	[strategies] = await getVaultStrategies({
 			vaultStrategies: vault.strategies,
 			stratTree
@@ -118,6 +116,7 @@ export default async function handler(req, res) {
 	return res.status(200).json(result);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function listVaultsWithStrategies({network = 1, isCurve = false, isRetired = false, isV1 = false, isAll = false, isStable = false, isDefi = false}) {
 	network = Number(network);
 	const	result = await getStrategies({network, isCurve, isRetired, isV1, isAll, isStable, isDefi});

@@ -2,7 +2,7 @@ import	{ethers}				from	'ethers';
 import	{Provider, Contract}	from	'ethcall';
 import	{toAddress}				from	'utils';
 
-export function getProvider(chain = 1) {
+export function getProvider(chain = 1): ethers.providers.Provider {
 	if (chain === 1) {
 		return new ethers.providers.InfuraProvider('homestead', '9aa3d95b3bc440fa88ea12eaa4456161');
 	} else if (chain === 137) {
@@ -19,59 +19,67 @@ export function getProvider(chain = 1) {
 	return new ethers.providers.InfuraProvider('homestead', '9aa3d95b3bc440fa88ea12eaa4456161');
 }
 
-export async function newEthCallProvider(provider, chainID) {
+export async function newEthCallProvider(provider: ethers.providers.Provider, chainID: number): Promise<Provider> {
 	const	ethcallProvider = new Provider();
 	if (chainID === 1337) {
 		await	ethcallProvider.init(new ethers.providers.JsonRpcProvider('http://localhost:8545'));
-		ethcallProvider.multicall.address = '0xc04d660976c923ddba750341fe5923e47900cf24';
+		ethcallProvider.multicall = {address: '0xc04d660976c923ddba750341fe5923e47900cf24', block: 0};
 		return ethcallProvider;
 	}
 	await	ethcallProvider.init(provider);
 	if (chainID === 250) {
-		ethcallProvider.multicall.address = '0xc04d660976c923ddba750341fe5923e47900cf24';
+		ethcallProvider.multicall = {address: '0xc04d660976c923ddba750341fe5923e47900cf24', block: 0};
 	}
 	if (chainID === 42161) {
-		ethcallProvider.multicall.address = '0x10126Ceb60954BC35049f24e819A380c505f8a0F';
+		ethcallProvider.multicall = {address: '0x10126Ceb60954BC35049f24e819A380c505f8a0F', block: 0};
 	}
 	return	ethcallProvider;
 }
 
-async function fetchStrategies({vaultAddress, network}) {
+async function fetchStrategies({vaultAddress, network}: {vaultAddress: string, network: number}): Promise<string[]> {
 	const	vaultContract = new Contract(
 		vaultAddress,
-		[{'stateMutability': 'view', 'type': 'function', 'name': 'withdrawalQueue', 'inputs': [{'name': 'arg0', 'type': 'uint256'}], 'outputs': [{'name': '', 'type': 'address'}], 'gas': 4057}]
+		[{'stateMutability': 'view', 'type': 'function', 'name': 'withdrawalQueue', 'inputs': [{'name': 'arg0', 'type': 'uint256'}], 'outputs': [{'name': '', 'type': 'address'}], 'gas': '4057'}]
 	);
-	const	strategiesIndex = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19];
+	const	strategiesIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 	const 	calls = [];
-	for (let i = 0; i < strategiesIndex.length; i++) {
-		calls.push(vaultContract.withdrawalQueue(strategiesIndex[i]));
+	for (const i of strategiesIndex) {
+		calls.push(vaultContract.withdrawalQueue(i));
 	}
 	const	ethcallProvider = await newEthCallProvider(getProvider(network), network);
 	const	callResult = await ethcallProvider.tryAll(calls);
-	return	callResult.filter(a => a !== ethers.constants.AddressZero);
+	return	callResult.filter((a): boolean => a !== ethers.constants.AddressZero) as string[];
 }
 
-async function fetchNames({addresses, network}) {
+async function fetchNames({addresses, network}: {addresses: string[], network: number}): Promise<string[]> {
 	const 	calls = [];
-	for (let index = 0; index < addresses.length; index++) {
+	for (const address of addresses) {
 		const	strategyContract = new Contract(
-			addresses[index],
-			[{'inputs':[],'name':'name','outputs':[{'internalType':'string','name':'','type':'string'}],'stateMutability':'view','type':'function'}]
+			address,
+			[{'inputs':[], 'name':'name', 'outputs':[{'internalType':'string', 'name':'', 'type':'string'}], 'stateMutability':'view', 'type':'function'}]
 		);
 		calls.push(strategyContract.name());
 	}
 	const	ethcallProvider = await newEthCallProvider(getProvider(network), network);
 	const	callResult = await ethcallProvider.tryAll(calls);
-	return	callResult.filter(a => a !== ethers.constants.AddressZero);	
+	return	callResult.filter((a): boolean => a !== ethers.constants.AddressZero) as string[];	
 }
 
-async function getVaultStrategies({vaultAddress, network, stratTree}) {
+type TStratTree = {[key: string]: {description: string, name: string}}
+type TStrategy = {
+    address: string;
+    name: string;
+    description: string;
+	noIPFS?: boolean;
+}
+
+async function getVaultStrategies({vaultAddress, network, stratTree}: {vaultAddress: string, network: number, stratTree: TStratTree}): Promise<[TStrategy[], boolean]> {
 	const	vaultStrategies = await fetchStrategies({vaultAddress, network});
-	const 	strategies = [];
+	const 	strategies: TStrategy[] = [];
 	let		hasMissingStrategiesDescriptions = false;
-	for (let i = 0; i < vaultStrategies.length; i++) {
-		const	strategyAddress = toAddress(vaultStrategies[i]);
-		const	strategyName = vaultStrategies[i].name;
+	for (const vaultStrategy of vaultStrategies) {
+		const	strategyAddress = toAddress(vaultStrategy);
+		const	strategyName: string = vaultStrategy.name;
 		const	details = stratTree[strategyAddress];
 		if (details) {
 			if (!details?.description) {
@@ -92,14 +100,14 @@ async function getVaultStrategies({vaultAddress, network, stratTree}) {
 		}
 	}
 	const	strategyWithNoName = [];
-	for (let index = 0; index < strategies.length; index++) {
-		const strategy = strategies[index];
+	for (const strategy of strategies) {
 		if (!strategy.name) {
 			strategyWithNoName.push(strategy.address);
 		}
 	}
 	const	noNameNames = await fetchNames({addresses: strategyWithNoName, network});
 	let		noNameIndex = 0;
+	// eslint-disable-next-line @typescript-eslint/prefer-for-of
 	for (let index = 0; index < strategies.length; index++) {
 		const strategy = strategies[index];
 		if (!strategy.name) {
@@ -111,16 +119,23 @@ async function getVaultStrategies({vaultAddress, network, stratTree}) {
 	return ([strategies, hasMissingStrategiesDescriptions]);
 }
 
-async function getStrategies({network}) {
-	let		allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
-	const	stratTree = {};
-	for (let index = 0; index < allStrategiesAddr.length; index++) {
-		const stratDetails = allStrategiesAddr[index];
-		for (let jindex = 0; jindex < (stratDetails.addresses).length; jindex++) {
-			const address = stratDetails.addresses[jindex];
+async function getStrategies({network}: {network: number}): Promise<{
+    address: string;
+    symbol: string;
+    underlying: string;
+    name: string;
+    display_name: string;
+    icon: string;
+    strategies: TStrategy[];
+    hasMissingStrategiesDescriptions: boolean;
+}[]> {
+	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
+	const	stratTree: TStratTree = {};
+	for (const stratDetails of allStrategiesAddr) {
+		for (const address of (stratDetails.addresses)) {
 			stratTree[toAddress(address)] = {
 				description: stratDetails.description,
-				name: stratDetails.name,
+				name: stratDetails.name
 			};
 		}
 	}
@@ -129,8 +144,7 @@ async function getStrategies({network}) {
 	const	vaultsWithStrats = [];
 	const	filteredVaults = vaults.filter(e => e.status !== 'endorsed');
 
-	for (let index = 0; index < filteredVaults.length; index++) {
-		const vault = filteredVaults[index];
+	for (const vault of filteredVaults) {
 		const	[strategies, hasMissingStrategiesDescriptions] = await getVaultStrategies({
 			vaultAddress: vault.address,
 			network,
@@ -151,10 +165,12 @@ async function getStrategies({network}) {
 	return (vaultsWithStrats);
 }
 
-const	vaultsMapping = {};
-let		vaultsMappingAccess = {};
+const	vaultsMapping: {[key: number]: object} = {};
+const	vaultsMappingAccess: {[key: string]: number} = {};
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export default async function handler(req, res) {
-	let		{network, revalidate} = req.query;
+	// eslint-disable-next-line prefer-const
+	let	{network, revalidate}: {network: number, revalidate: string} = req.query;
 	network = Number(network);
 
 	const	now = new Date().getTime();
@@ -168,7 +184,7 @@ export default async function handler(req, res) {
 	return res.status(200).json(vaultsMapping[network]);
 }
 
-export async function listVaultsWithStrategies({network = 1}) {
+export async function listVaultsWithStrategies({network = 1}): Promise<string> {
 	network = Number(network);
 	const	result = await getStrategies({network});
 	return JSON.stringify(result);

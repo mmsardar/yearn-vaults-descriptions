@@ -4,10 +4,11 @@ import {Router} from 'next/router';
 type TLocalizationContext = {
 	common: {[key: string]: string},
 	language: string;
-	set_language?: (language: string) => void;
+	set_language: ((language: string) => void);
   }
 
-const	Localization = createContext<TLocalizationContext>({common:{}, language:'en'});
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const	Localization = createContext<TLocalizationContext>({common:{}, language:'en', set_language: (_l): void => void 0});
 
 function	getCommons(language: string): {[key: string]: string} {
 	try {

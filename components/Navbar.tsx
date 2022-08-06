@@ -3,27 +3,27 @@ import	{useRouter}		from	'next/router';
 import	useNetwork		from	'contexts/useNetwork';
 
 const options = ['Ethereum', 'Fantom', 'Arbitrum'];
-const routerMapping = {
+const routerMapping: {[key: string]: string} = {
 	'/internal/missing-descriptions': 'Strategies',
 	'/internal/missing-ape': 'Strategies ape.tax',
 	'/internal/missing-tokens': 'Tokens',
 	'/internal/missing-translations': 'Translations'
 };
 
-function	Navbar() {
+function	Navbar(): React.ReactElement {
 	const {currentNetwork, set_currentNetwork} = useNetwork();
 	const router = useRouter();
 
 	return (
-		<nav className={'flex relative flex-col w-full'}>
-			<div className={'flex absolute right-0 flex-row justify-between w-full'}>
+		<nav className={'relative flex w-full flex-col'}>
+			<div className={'absolute right-0 flex w-full flex-row justify-between'}>
 				<div />
-				<div className={'flex flex-row space-x-2 h-full'}>
-					<div className={'flex flex-row justify-start items-center h-full'} key={routerMapping[router.pathname]}>
+				<div className={'flex h-full flex-row space-x-2'}>
+					<div className={'flex h-full flex-row items-center justify-start'} key={routerMapping[router.pathname]}>
 						<select
 							value={routerMapping[router.pathname]}
-							className={'flex items-center py-2 px-3 pr-7 m-0 mr-1 text-xs font-semibold whitespace-nowrap rounded-sm border-none cursor-pointer button-light'}
-							onChange={e => {
+							className={'button-light m-0 mr-1 flex cursor-pointer items-center whitespace-nowrap rounded-sm border-none py-2 px-3 pr-7 text-xs font-semibold'}
+							onChange={(e): void => {
 								if (e.target.value === 'Strategies')
 									router.push('/internal/missing-descriptions');
 								else if (e.target.value === 'Strategies ape.tax')
@@ -33,19 +33,19 @@ function	Navbar() {
 								else if (e.target.value === 'Translations')
 									router.push('/internal/missing-translations');
 							}}>
-							{Object.entries(routerMapping).map(([key, value]) => (
+							{Object.entries(routerMapping).map(([key, value]): React.ReactElement => (
 								<option className={'cursor-pointer'} key={key} value={value}>
 									{value}
 								</option>
 							))}
 						</select>
 					</div>
-					<div className={'flex flex-row justify-start items-center h-full'}>
+					<div className={'flex h-full flex-row items-center justify-start'}>
 						<select
 							value={currentNetwork}
-							className={'flex items-center py-2 px-3 pr-7 m-0 mr-1 text-xs font-semibold whitespace-nowrap rounded-sm border-none cursor-pointer button-light'}
-							onChange={e => set_currentNetwork(e.target.value)}>
-							{options.map((chain, index) => (
+							className={'button-light m-0 mr-1 flex cursor-pointer items-center whitespace-nowrap rounded-sm border-none py-2 px-3 pr-7 text-xs font-semibold'}
+							onChange={(e): void => set_currentNetwork(e.target.value)}>
+							{options.map((chain, index): React.ReactElement => (
 								<option className={'cursor-pointer'} key={index} value={chain}>{chain}</option>
 							))}
 						</select>
