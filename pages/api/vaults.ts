@@ -49,7 +49,7 @@ async function getVaultStrategies({vaultStrategies, stratTree}) {
 }
 
 async function getStrategies({network, isCurve, isRetired, isV1, isAll, isStable, isDefi}) {
-	let		allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
+	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree = {};
 
 	for (const stratDetails of allStrategiesAddr) {
@@ -108,17 +108,16 @@ async function getStrategies({network, isCurve, isRetired, isV1, isAll, isStable
 	}
 	return (vaultsWithStrats);
 }
+import type {NextApiRequest, NextApiResponse} from 'next';
 
-export default async function handler(req, res) {
-	let		{network, isCurve, isRetired, isV1, isAll, isStable, isDefi} = req.query;
-	network = Number(network);
-	const	result = await getStrategies({network, isCurve, isRetired, isV1, isAll, isStable, isDefi});
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+	const	{network, isCurve, isRetired, isV1, isAll, isStable, isDefi} = req.query;
+	const	result = await getStrategies({network: Number(network), isCurve, isRetired, isV1, isAll, isStable, isDefi});
 	return res.status(200).json(result);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function listVaultsWithStrategies({network = 1, isCurve = false, isRetired = false, isV1 = false, isAll = false, isStable = false, isDefi = false}) {
-	network = Number(network);
-	const	result = await getStrategies({network, isCurve, isRetired, isV1, isAll, isStable, isDefi});
+	const	result = await getStrategies({network: Number(network), isCurve, isRetired, isV1, isAll, isStable, isDefi});
 	return JSON.stringify(result);
 }

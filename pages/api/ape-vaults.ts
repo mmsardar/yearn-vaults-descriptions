@@ -79,7 +79,6 @@ async function getVaultStrategies({vaultAddress, network, stratTree}: {vaultAddr
 	let		hasMissingStrategiesDescriptions = false;
 	for (const vaultStrategy of vaultStrategies) {
 		const	strategyAddress = toAddress(vaultStrategy);
-		const	strategyName: string = vaultStrategy.name;
 		const	details = stratTree[strategyAddress];
 		if (details) {
 			if (!details?.description) {
@@ -87,13 +86,13 @@ async function getVaultStrategies({vaultAddress, network, stratTree}: {vaultAddr
 			}
 			strategies.push({
 				address: strategyAddress || '',
-				name: details?.name || strategyName || '',
+				name: details?.name || '',
 				description: (details?.description ? details.description : '')
 			});	
 		} else {
 			strategies.push({
 				address: strategyAddress || '',
-				name: strategyName || '',
+				name: '',
 				description: ''
 			});	
 			hasMissingStrategiesDescriptions = true;
@@ -167,25 +166,25 @@ async function getStrategies({network}: {network: number}): Promise<{
 
 const	vaultsMapping: {[key: number]: object} = {};
 const	vaultsMappingAccess: {[key: string]: number} = {};
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default async function handler(req, res) {
+import type {NextApiRequest, NextApiResponse} from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
 	// eslint-disable-next-line prefer-const
-	let	{network, revalidate}: {network: number, revalidate: string} = req.query;
-	network = Number(network);
+	let	{network, revalidate} = req.query;
+	const networkID = Number(network);
 
 	const	now = new Date().getTime();
-	const	lastAccess = vaultsMappingAccess[network] || 0;
-	if (lastAccess === 0 || ((now - lastAccess) > 5 * 60 * 1000) || revalidate === 'true' || !vaultsMapping[network]) {
-		const	result = await getStrategies({network});
-		vaultsMapping[network] = result;
-		vaultsMappingAccess[network] = now;
+	const	lastAccess = vaultsMappingAccess[networkID] || 0;
+	if (lastAccess === 0 || ((now - lastAccess) > 5 * 60 * 1000) || revalidate === 'true' || !vaultsMapping[networkID]) {
+		const	result = await getStrategies({network: networkID});
+		vaultsMapping[networkID] = result;
+		vaultsMappingAccess[networkID] = now;
 	}
 	res.setHeader('Cache-Control', 's-maxage=6000'); // 60 minutes
-	return res.status(200).json(vaultsMapping[network]);
+	return res.status(200).json(vaultsMapping[networkID]);
 }
 
 export async function listVaultsWithStrategies({network = 1}): Promise<string> {
-	network = Number(network);
-	const	result = await getStrategies({network});
+	const	result = await getStrategies({network: Number(network)});
 	return JSON.stringify(result);
 }

@@ -73,17 +73,16 @@ async function getStrategies({network}) {
 	return (vaultsWithStrats);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export default async function handler(req, res) {
-	let		{network} = req.query;
-	network = Number(network);
-	const	result = await getStrategies({network});
+import type {NextApiRequest, NextApiResponse} from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
+	const	{network} = req.query;
+	const	result = await getStrategies({network: Number(network)});
 	return res.status(200).json(result);
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export async function listVaultsWithStrategies({network = 1}) {
-	network = Number(network);
-	const	result = await getStrategies({network});
+	const	result = await getStrategies({network: Number(network)});
 	return JSON.stringify(result);
 }
