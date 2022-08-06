@@ -1,8 +1,14 @@
+// @ts-check
+
+/**
+ * @type {import('next').NextConfig}
+ **/
+
 // const Dotenv = require('dotenv-webpack');
 // const withPWA = require('next-pwa');
 
 // module.exports = withPWA({
-module.exports = ({
+const nextConfig = ({
 	images: {
 		domains: [
 			'rawcdn.githack.com',
@@ -32,3 +38,5 @@ module.exports = ({
 		META_GITHUB_URL: 'https://github.com/yearn/yearn-meta'
 	}
 });
+
+module.exports = nextConfig;
