@@ -103,7 +103,7 @@ async function getStrategies({network, isCurve, isRetired, isV1, isAll, isStable
 			display_name: vault.display_name || '', 
 			icon: vault.icon || '',
 			hasBoost: vault?.apy?.composite?.boost ? true : false,
-			strategies,
+			strategies
 		});
 	}
 	return (vaultsWithStrats);
@@ -116,8 +116,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 	return res.status(200).json(result);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function listVaultsWithStrategies({network = 1, isCurve = false, isRetired = false, isV1 = false, isAll = false, isStable = false, isDefi = false}) {
+export async function listVaultsWithStrategies({network = 1, isCurve = false, isRetired = false, isV1 = false, isAll = false, isStable = false, isDefi = false}): Promise<string> {
 	const	result = await getStrategies({network: Number(network), isCurve, isRetired, isV1, isAll, isStable, isDefi});
 	return JSON.stringify(result);
 }

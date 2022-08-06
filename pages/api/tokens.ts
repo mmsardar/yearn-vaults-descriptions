@@ -16,11 +16,11 @@ async function getVaultStrategies({vaultAddress, wantAddress, wantName, tokenTre
 	], !vaultTokenHasIPFSFile || !wantTokenHasIPFSFile]);
 }
 
-async function getTokens({network}) {
+async function getTokens({network}: {network: number}): Promise<object[]> {
 	const	vaultDataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/vaults/all`)).json();
 	const	dataFromIPFS = await (await fetch(`${process.env.META_API_URL}/${network}/tokens/all`)).json();
-	const	tokenTree = {};
-	const	vaultTree = {};
+	const	tokenTree: {[key: string]: object} = {};
+	const	vaultTree: {[key: string]: boolean} = {};
 
 	for (const tokenDetails of dataFromIPFS) {
 		const address = tokenDetails.address;
@@ -72,8 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 	return res.status(200).json(result);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function listVaultsWithTokens({network = 1}) {
+export async function listVaultsWithTokens({network = 1}): Promise<string> {
 	const	result = await getTokens({network: Number(network)});
 	return JSON.stringify(result);
 }

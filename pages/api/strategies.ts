@@ -35,6 +35,7 @@ async function getVaultStrategies({vaultStrategies, stratTree}): Promise<[{
 	return ([strategies, hasMissingStrategiesDescriptions]);
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 async function getStrategies({network}) {
 	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree = {};
@@ -81,8 +82,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 	return res.status(200).json(result);
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function listVaultsWithStrategies({network = 1}) {
+export async function listVaultsWithStrategies({network = 1}): Promise<string> {
 	const	result = await getStrategies({network: Number(network)});
 	return JSON.stringify(result);
 }

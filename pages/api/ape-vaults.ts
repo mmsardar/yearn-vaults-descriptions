@@ -143,7 +143,7 @@ async function getStrategies({network}: {network: number}): Promise<{
 	const	vaultsWithStrats = [];
 	const	filteredVaults = vaults.filter(e => e.status !== 'endorsed');
 
-	for (const vault of filteredVaults) {
+	await Promise.all(filteredVaults.map(async (vault): Promise<void> => {
 		const	[strategies, hasMissingStrategiesDescriptions] = await getVaultStrategies({
 			vaultAddress: vault.address,
 			network,
@@ -160,7 +160,7 @@ async function getStrategies({network}: {network: number}): Promise<{
 			strategies,
 			hasMissingStrategiesDescriptions
 		});
-	}
+	}));
 	return (vaultsWithStrats);
 }
 
