@@ -1,5 +1,5 @@
 import axios from 'axios';
-import LOCALES from 'utils/locale';
+import LOCALES, {TLocaleProps} from 'utils/locale';
 
 /**
  * Return all protocols of that network
@@ -19,29 +19,32 @@ import LOCALES from 'utils/locale';
  *    }
  * }
  */
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function listProtocols(chainId: number) {
+type TProtocol = {
+	'$schema': string;
+	name: string;
+	description: string;
+	localization: {
+		[key: string]: {
+			name: string;
+			description: string;
+		}
+	}
+}
+export type TListProtocol = TProtocol & {filename: string}
+
+export async function listProtocols(chainId: number): Promise<TListProtocol[]> {
 	const protocolApiUrl = `${process.env.META_API_URL}/${chainId}/protocols`;
 	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-	const protocolFilenames: string[] = await axios.get(`${protocolApiUrl}/index`).then(res => res.data.files);
+	const protocols: TProtocol[] = await axios.get(`${protocolApiUrl}/all`, {params: {loc: 'all'}}).then(res => res.data.files);
 
-	if (!(protocolFilenames instanceof Array)) {
+	if (!(protocols instanceof Array)) {
 		console.warn('protocolFilenames is not an array.');
 		return [];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-	const protocolPromises = protocolFilenames.map(async (name) => {
-		// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-		return  axios.get(`${protocolApiUrl}/${name}`).then(async (res) => {
-			return {
-				...res.data,
-				filename: name
-			};
-		});
+	return protocols.map((protocol): TListProtocol => { 
+		return {...protocol, filename: protocol.name.trim()};
 	});
-
-	return Promise.all(protocolPromises);
 }
 
 /**
@@ -49,7 +52,7 @@ export async function listProtocols(chainId: number) {
  * 
  * A "missingTranslationsLocales" field will be added for each protocol with missing translations
  */
-export function filterProtocolsWithMissingTranslations(protocols: object[] = [], localeFilter = '') {
+export function filterProtocolsWithMissingTranslations(protocols: TListProtocol[] = [], localeFilter = ''): (TListProtocol & {missingTranslationsLocales: TLocaleProps[]})[] {
 	if (!(protocols instanceof Array)) {
 		console.warn('protocols is not an array.');
 		return [];
@@ -71,13 +74,8 @@ export function filterProtocolsWithMissingTranslations(protocols: object[] = [],
 		return protocol.missingTranslationsLocales.length > 0;
 	});
 }
-type TMissingTranslation = {
-	code: string;
-	name: string;
-	symbol: string;
-};
-function findProtocolMissingTranslations(protocol): TMissingTranslation[] {
-	const missingTranslations: TMissingTranslation[] = [];
+function findProtocolMissingTranslations(protocol: TListProtocol): TLocaleProps[] {
+	const missingTranslations: TLocaleProps[] = [];
 	const englishDescription = protocol.description;
 
 	for (const [locale, translation] of Object.entries(protocol.localization ?? {})) {

@@ -1,12 +1,46 @@
 import {toAddress} from 'utils';
+import type {NextApiRequest, NextApiResponse} from 'next';
 
+export type TStratTree = {[key: string]: {name: string, description: string, localization?: TLocalization}}
+type TLocalization = {
+	[key: string]: {
+		name: string;
+		description: string;
+	};
+};
 
-export type TStratTree = {[key: string]: {name: string, description: string, localization?: object}}
 export type TStrategy = {
+	name: string;
+	address: string;
+	icon?: string;
+	description?: string;
+	localization?: TLocalization;
+	strategies?: object[];
+	noIPFS?: boolean;
+ }
+
+export type TVaultsWithStrat = TVault & {
+    strategies: TStrategy[];
+    hasMissingStrategiesDescriptions?: boolean;
+}
+export type TVault = {
     address: string;
-    name: string;
-    description?: string;
-    localization?: object;
+    name?: string;
+    logo?: string;
+    title?: string;
+    display_name?: string;
+	underlying?: string;
+    icon?: string;
+    strategies: TStrategy[];
+    migration?: {available?: boolean};
+    apy?: {type?: string; composite?: {boost?: boolean}};
+	token?: {symbol?: string; name?: string; address?: string;}
+	want?: {symbol?: string; name?: string; address?: string;}
+    type?: string;
+    symbol?: string;
+    status?: string;
+    special?: boolean;
+	hasBoost?: boolean;
 }
 
 
@@ -40,36 +74,6 @@ async function getVaultStrategies({vaultStrategies, stratTree}: {vaultStrategies
 	return ([strategies, hasMissingStrategiesDescriptions]);
 }
 
-export type TVaultsWithStrat = {
-    address: string;
-    symbol: string;
-    name: string;
-    display_name: string;
-    icon: string;
-	underlying?: string;
-	hasBoost?: boolean;
-    strategies: TStrategy[];
-    hasMissingStrategiesDescriptions?: boolean;
-}
-export type TVault = {
-    address: string;
-    name?: string;
-    logo?: string;
-    title?: string;
-    display_name?: string;
-    icon?: string;
-    strategies: TStrategy[];
-    migration: {available?: boolean};
-    apy?: {type?: string; composite?: {boost?: boolean}};
-	token: {symbol?: string; name?: string; address?: string;}
-	want?: {symbol?: string; name?: string; address?: string;}
-    type: string;
-    symbol?: string;
-    status?: string;
-    special?: boolean;
-
-}
-
 async function getStrategies({network}: {network: number}): Promise<TVaultsWithStrat[]> {
 	const	allStrategiesAddr = await (await fetch(`${process.env.META_API_URL}/${network}/strategies/all`)).json();
 	const	stratTree: TStratTree = {};
@@ -97,7 +101,7 @@ async function getStrategies({network}: {network: number}): Promise<TVaultsWithS
 
 		vaultsWithStrats.push({
 			address: vault.address || '', 
-			symbol: vault.token.symbol || '', 
+			symbol: vault.token?.symbol || '', 
 			name: vault.name || '', 
 			display_name: vault.display_name || '', 
 			icon: vault.icon || '',
@@ -107,8 +111,6 @@ async function getStrategies({network}: {network: number}): Promise<TVaultsWithS
 	}
 	return (vaultsWithStrats);
 }
-
-import type {NextApiRequest, NextApiResponse} from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse): Promise<void> {
 	const	{network} = req.query;

@@ -1,13 +1,14 @@
 import	React						from	'react';
 import	Image						from	'next/image';
 import	{parseMarkdown}				from	'utils';
-import	{listVaultsWithTokens}		from	'pages/api/tokens';
 import	useNetwork					from	'contexts/useNetwork';
 import	Navbar						from	'components/Navbar';
 import	HeadIconCogs				from	'components/icons/HeadIconCogs';
 import	IconChevron					from	'components/icons/IconChevron';
+import	{listVaultsWithTokens, TTokensData, TVaultWithTokens}		from	'pages/api/tokens';
 
-function	Details({tokensData, chainExplorer}): JSX.Element {
+
+function	Details({tokensData, chainExplorer}: {tokensData: TTokensData, chainExplorer: string}): JSX.Element {
 	const	wantToken = tokensData[1];
 
 	return (
@@ -35,7 +36,7 @@ function	Details({tokensData, chainExplorer}): JSX.Element {
 	);
 }
 
-function	Tokens({vault, chainExplorer}): JSX.Element {
+function	Tokens({vault, chainExplorer}: {vault: TVaultWithTokens, chainExplorer: string}): JSX.Element {
 	const	[isExpanded, set_isExpanded] = React.useState(false);
 	const	[isExpandedAnimation, set_isExpandedAnimation] = React.useState(false);
 	
@@ -56,7 +57,7 @@ function	Tokens({vault, chainExplorer}): JSX.Element {
 			<div className={'flex cursor-pointer flex-row items-center'} onClick={onExpand}>
 				<div className={'mr-4 flex w-8 items-center justify-center'}>
 					<Image
-						src={vault.icon}
+						src={vault.icon ?? ''}
 						width={32}
 						height={32}
 						loading={'eager'} />
@@ -91,7 +92,7 @@ function	Tokens({vault, chainExplorer}): JSX.Element {
 }
 
 
-function	Index({tokens}): JSX.Element {
+function	Index({tokens}: {tokens: TVaultWithTokens[]}): JSX.Element {
 	const	[data, set_data] = React.useState(tokens);
 	const	[isFetchingData, set_isFetchingData] = React.useState(false);
 	const	[chainExplorer, set_chainExplorer] = React.useState('https://etherscan.io');
@@ -162,7 +163,7 @@ function	Index({tokens}): JSX.Element {
 					</div>
 					
 					<div className={'w-full'}>
-						{(data || [])?.filter(e => e.hasMissingTokenInfo).map((vault): JSX.Element => (
+						{(data || [])?.filter((e): boolean => e.hasMissingTokenInfo).map((vault: TVaultWithTokens): JSX.Element => (
 							<Tokens key={vault.address} vault={vault} chainExplorer={chainExplorer} />
 						))}
 					</div>

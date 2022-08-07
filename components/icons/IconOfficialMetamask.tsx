@@ -1,8 +1,8 @@
-import	React							from	'react';
+import	React, {ReactElement}		from	'react';
 
-function	Icon({className}) {
+function	Icon(props: React.SVGProps<SVGSVGElement>): ReactElement {
 	return (
-		<svg version={'1.1'} id={'Layer_1'} xmlns={'http://www.w3.org/2000/svg'} viewBox={'0 0 318.6 318.6'} xmlSpace={'preserve'} className={className}>
+		<svg {...props} version={'1.1'} id={'Layer_1'} xmlns={'http://www.w3.org/2000/svg'} viewBox={'0 0 318.6 318.6'} xmlSpace={'preserve'}>
 			<polygon strokeLinecap={'round'} strokeLinejoin={'round'} fill={'#E2761B'} stroke={'#E2761B'} points={'274.1,35.5 174.6,109.4 193,65.8'}/>
 			<g>
 				<polygon strokeLinecap={'round'} strokeLinejoin={'round'} fill={'#E4761B'} stroke={'#E4761B'} points={'44.4,35.5 143.1,110.1 125.6,65.8'}/>

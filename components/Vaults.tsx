@@ -1,18 +1,10 @@
 import	React							from	'react';
 import	Image							from	'next/image';
-import	Strategies, {TStrategy}			from	'components/Strategies';
+import	Strategies						from	'components/Strategies';
 import	IconChevron						from	'components/icons/IconChevron';
 import	IconLinkOut						from	'components/icons/IconLinkOut';
 import	IconRetired						from	'components/icons/IconRetired';
-
-export type TVault = {
-	name: string;
-	address: string;
-	icon: string;
-	display_name?: string;
-	strategies: TStrategy[];
-	symbol?: string;
- }
+import	{TVault}						from	'pages/api/strategies';
 
 function Vaults({vault, chainExplorer, isRetired, isApeTax, isPublicApeTax, shouldHideValids}: { vault: TVault, chainExplorer: string, isRetired?: boolean, isApeTax?: boolean, isPublicApeTax?: boolean, shouldHideValids?: boolean }): React.ReactElement {
 	const	[isExpanded, set_isExpanded] = React.useState(false);
@@ -46,7 +38,7 @@ function Vaults({vault, chainExplorer, isRetired, isApeTax, isPublicApeTax, shou
 						: isRetired ?
 							<IconRetired />
 							: <Image
-								src={vault.icon}
+								src={vault.icon ?? ''}
 								width={32}
 								height={32}
 								loading={'eager'} />}

@@ -4,8 +4,9 @@ import	Vaults							from	'components/Vaults';
 import	HeadIconCogs					from	'components/icons/HeadIconCogs';
 import	{listVaultsWithStrategies}		from	'pages/api/ape-vaults';
 import	useNetwork						from	'contexts/useNetwork';
+import	{TVaultsWithStrat}		 		from	'pages/api/strategies';
 
-function	Index({vaults}): JSX.Element {
+function	Index({vaults}: {vaults: TVaultsWithStrat[]}): JSX.Element {
 	const	[vaultList, set_vaultList] = React.useState(vaults);
 	const	[isFetchingData, set_isFetchingData] = React.useState(false);
 	const	[chainExplorer, set_chainExplorer] = React.useState('https://etherscan.io');
@@ -76,7 +77,7 @@ function	Index({vaults}): JSX.Element {
 						</div>
 					</div>
 					<div className={'w-full'}>
-						{(vaultList || [])?.filter(e => e.hasMissingStrategiesDescriptions).map((vault): JSX.Element => <Vaults
+						{(vaultList || [])?.filter((e): boolean => e.hasMissingStrategiesDescriptions ?? false).map((vault): JSX.Element => <Vaults
 							key={vault.name}
 							vault={vault}
 							chainExplorer={chainExplorer}

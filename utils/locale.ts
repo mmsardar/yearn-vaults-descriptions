@@ -1,4 +1,12 @@
-const	LOCALES = {
+type TLocals = {[key: string]: TLocaleProps}
+export type TLocaleProps = {
+	code: string;
+	name: string;
+	symbol: string;
+};
+
+
+const	LOCALES: TLocals = {
 	'en': {
 		'code': 'en',
 		'name': 'English',

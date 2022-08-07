@@ -2,16 +2,7 @@ import	React							from	'react';
 import	{parseMarkdown}					from	'utils';
 import	HeadIconRocket					from	'components/icons/HeadIconRocket';
 import	useLocalization					from	'contexts/useLocalization';
-
-export type TStrategy = {
-	name: string;
-	address: string;
-	icon: string;
-	description?: string;
-	localization?: {[key: string]: {name: string, description: string}};
-	strategies?: object[];
-	noIPFS?: boolean;
- }
+import	{TStrategy}						from	'pages/api/strategies';
 
 function	Strategies({strategiesData, vaultSymbol = '', chainExplorer, shouldHideValids, isRetired}: {strategiesData: TStrategy[], vaultSymbol?: string, chainExplorer: string, shouldHideValids?: boolean, isRetired?: boolean}): React.ReactElement {
 	const	{language} = useLocalization();

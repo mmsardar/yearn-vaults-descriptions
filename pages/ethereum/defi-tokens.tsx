@@ -2,10 +2,12 @@ import	React							from	'react';
 import {GetStaticProps}					from	'next';
 import	Link							from	'next/link';
 import	HeadIconVaults					from	'components/icons/HeadIconVaults';
-import	Vaults, {TVault}				from	'components/Vaults';
+import	Vaults							from	'components/Vaults';
 import	useLocalization					from	'contexts/useLocalization';
 import	{listVaultsWithStrategies}		from	'pages/api/vaults';
 import	{parseMarkdown}					from	'utils';
+import	{TVault}						from	'pages/api/strategies';
+
 
 const	chainExplorer = 'https://etherscan.io';
 

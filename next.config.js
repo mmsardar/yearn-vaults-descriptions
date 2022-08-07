@@ -1,23 +1,17 @@
-// @ts-check
-
-/**
- * @type {import('next').NextConfig}
- **/
-
 // const Dotenv = require('dotenv-webpack');
-// const withPWA = require('next-pwa');
+const withPWA = require('next-pwa');
 
 // module.exports = withPWA({
-const nextConfig = ({
+const nextConfig = withPWA({
 	images: {
 		domains: [
 			'rawcdn.githack.com',
 			'raw.githubusercontent.com'
 		]
 	},
-	// pwa: {
-	// 	dest: 'public'
-	// },
+	pwa: {
+		dest: 'public'
+	},
 	i18n: {
 		locales: ['en', 'fr', 'es', 'de', 'pt', 'el', 'tr', 'vi', 'zh', 'hi', 'ja', 'id', 'ru'],
 		defaultLocale: 'en'

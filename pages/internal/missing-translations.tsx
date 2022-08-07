@@ -4,17 +4,17 @@ import	HeadIconCogs					from	'components/icons/HeadIconCogs';
 import	useNetwork						from	'contexts/useNetwork';
 import	IconChevron						from	'components/icons/IconChevron';
 import	IconLinkOut						from	'components/icons/IconLinkOut';
-import	{filterProtocolsWithMissingTranslations, listProtocols} from 'pages/api/protocols';
-import	LOCALES							from	'utils/locale';
+import	LOCALES, {TLocaleProps}			from	'utils/locale';
+import	{filterProtocolsWithMissingTranslations, listProtocols, TListProtocol} from 'pages/api/protocols';
 
 const META_GH_PROTOCOL_URI = `${process.env.META_GITHUB_URL}/tree/master/data/protocols`;
 
-function Protocol({name, filename, description, missingTranslationsLocales, localeFilter, localization}): JSX.Element {
+function Protocol({name, filename, description, missingTranslationsLocales, localeFilter, localization}: TListProtocol & {missingTranslationsLocales: TLocaleProps[], localeFilter: string}): JSX.Element {
 	const	{currentChainId} = useNetwork();
 	const	[isExpanded, set_isExpanded] = React.useState(false);
 	const	[isExpandedAnimation, set_isExpandedAnimation] = React.useState(false);
 
-	const missingTranslationCounts = React.useMemo(() => {
+	const missingTranslationCounts = React.useMemo((): number => {
 		return localeFilter ? 1 : missingTranslationsLocales.length;
 	}, [missingTranslationsLocales, localeFilter]);
 
@@ -48,7 +48,7 @@ function Protocol({name, filename, description, missingTranslationsLocales, loca
 				}
 				<div className={'mr-1 ml-auto flex flex-row justify-center'}>
 					<a
-						onClick={e => e.stopPropagation()}
+						onClick={(e): void => e.stopPropagation()}
 						target={'_blank'}
 						href={`${META_GH_PROTOCOL_URI}/${currentChainId}/${filename}.json`}
 						rel={'noreferrer'}>
@@ -61,7 +61,7 @@ function Protocol({name, filename, description, missingTranslationsLocales, loca
 				{isExpanded ? (
 					<div className={'mt-4 space-y-2 dark:text-gray-3'}>
 						<p>{description}</p>
-						{(!localeFilter || localeFilter === 'en') && <p className={'text-xs'}>{`Missing translations for ${missingTranslationsLocales.map(data => data.name).join(', ')}`}</p>}
+						{(!localeFilter || localeFilter === 'en') && <p className={'text-xs'}>{`Missing translations for ${missingTranslationsLocales.map((data): string => data.name).join(', ')}`}</p>}
 					</div>
 				) : <div />}
 			</div>
@@ -69,7 +69,7 @@ function Protocol({name, filename, description, missingTranslationsLocales, loca
 	);	
 }
 
-function	Index({protocolsList}): JSX.Element {
+function	Index({protocolsList}: { protocolsList: TListProtocol[]}): JSX.Element {
 	const	[protocols, set_protocols] = React.useState(protocolsList ?? []);
 	const	[localeFilter, set_localeFilter] = React.useState('');
 	const	[isFetchingData, set_isFetchingData] = React.useState(false);
@@ -95,6 +95,7 @@ function	Index({protocolsList}): JSX.Element {
 		}
 	}
 
+	// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 	const protocolsWithMissingTranslations = React.useMemo(() => {
 		return filterProtocolsWithMissingTranslations(protocols, localeFilter);
 	}, [protocols, localeFilter]);

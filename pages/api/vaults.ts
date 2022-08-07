@@ -99,8 +99,8 @@ async function getStrategies({network = 1, isCurve = false, isRetired = false, i
 
 		vaultsWithStrats.push({
 			address: vault.address || '', 
-			symbol: vault.token.symbol || '', 
-			underlying: vault.token.address || '',
+			symbol: vault.token?.symbol || '', 
+			underlying: vault.token?.address || '',
 			name: vault.name || '', 
 			display_name: vault.display_name || '', 
 			icon: vault.icon || '',
